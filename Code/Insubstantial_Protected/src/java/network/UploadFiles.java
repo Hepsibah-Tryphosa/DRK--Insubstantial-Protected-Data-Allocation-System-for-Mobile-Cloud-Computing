@@ -1,6 +1,5 @@
 package network;
 
-
 import com.oreilly.servlet.MultipartRequest;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import java.io.BufferedReader;
@@ -31,26 +30,27 @@ import javax.servlet.http.HttpSession;
 public class UploadFiles extends HttpServlet {
 
     File file;
-    final String filepath = "D:/";
+    final String filepath = "/UploadFiles";
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        new File(filepath).mkdir();
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         try {
 
             MultipartRequest m = new MultipartRequest(request, filepath);
-            
+
             String pkey = m.getParameter("pkey");
             String fname = m.getParameter("fname");
-           
+
             String des = m.getParameter("des");
             String accesspolicy = m.getParameter("ap");
             File file = m.getFile("file");
             String filename = file.getName().toLowerCase();
 
             Connection con = DbConnection.getConnection();
-            BufferedReader br = new BufferedReader(new FileReader(filepath + filename));
+            BufferedReader br = new BufferedReader(new FileReader(new File(filepath , filename)));
             StringBuffer sb = new StringBuffer();
             String temp = null;
 
@@ -74,29 +74,29 @@ public class UploadFiles extends HttpServlet {
             System.out.println("converted secretkey to string:" + skey);
 
             HttpSession user = request.getSession(true);
-             String oid = (String) user.getAttribute("oid");
+            String oid = (String) user.getAttribute("oid");
             String owner = user.getAttribute("oname").toString();
 
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             Date date = new Date();
             String time = dateFormat.format(date);
 
-           // boolean status = new Ftpcon().upload(file);
+            // boolean status = new Ftpcon().upload(file);
             //if (status) {
-                Statement st = con.createStatement();
+            Statement st = con.createStatement();
 
-                int i = st.executeUpdate("insert into fileupload(filename,content,owner,time,secret_key,public_key, oid, des, accesspolicy)values('" + file.getName() + "','" + CipherText + "','" + owner + "','" + time + "','" + skey + "','" + pkey + "', '"+oid+"','"+des+"','"+accesspolicy+"')");
-                System.out.println(i);
-                if (i != 0) {
+            int i = st.executeUpdate("insert into fileupload(filename,content,owner,time,secret_key,public_key, oid, des, accesspolicy)values('" + file.getName() + "','" + CipherText + "','" + owner + "','" + time + "','" + skey + "','" + pkey + "', '" + oid + "','" + des + "','" + accesspolicy + "')");
+            System.out.println(i);
+            if (i != 0) {
 
-                    response.sendRedirect("uploadfile.jsp?msg=File_upload successfully");
+                response.sendRedirect("uploadfile.jsp?msg=File_upload successfully");
 
-                } else {
-                    out.println("error while uploading additional informations");
-                }
+            } else {
+                out.println("error while uploading additional informations");
+            }
             //} else {
-               // out.println("error");
-           // }
+            // out.println("error");
+            // }
 
         } catch (Exception e) {
             out.println(e);
@@ -107,8 +107,7 @@ public class UploadFiles extends HttpServlet {
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
-     * Handles the HTTP
-     * <code>GET</code> method.
+     * Handles the HTTP <code>GET</code> method.
      *
      * @param request servlet request
      * @param response servlet response
@@ -122,8 +121,7 @@ public class UploadFiles extends HttpServlet {
     }
 
     /**
-     * Handles the HTTP
-     * <code>POST</code> method.
+     * Handles the HTTP <code>POST</code> method.
      *
      * @param request servlet request
      * @param response servlet response
